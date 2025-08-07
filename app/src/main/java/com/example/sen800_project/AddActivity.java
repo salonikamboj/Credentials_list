@@ -8,10 +8,7 @@ import android.widget.EditText;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+
 
 public class AddActivity extends AppCompatActivity {
 
@@ -23,12 +20,6 @@ public class AddActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_add);
 
-        Toolbar toolbar = findViewById(R.id.my_toolbar);
-        setSupportActionBar(toolbar);
-        toolbar.setTitleTextColor(Color.WHITE);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Add Credentials");
-        }
 
         app_name= findViewById(R.id.app_name);
         email = findViewById(R.id.email);
