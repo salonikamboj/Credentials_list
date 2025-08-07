@@ -42,7 +42,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.MyViewHold
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") final int position) {
 
-        holder._id_txt.setText(String.valueOf(_id.get(position)));
+        holder._id_txt.setText(String.valueOf(position + 1));
         holder.app_name_txt.setText(String.valueOf(app_name.get(position)));
         holder.email_txt.setText(String.valueOf(email.get(position)));
         holder.password_txt.setText(String.valueOf(password.get(position)));
