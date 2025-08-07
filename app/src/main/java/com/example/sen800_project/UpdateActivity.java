@@ -41,7 +41,7 @@ public class UpdateActivity extends AppCompatActivity {
         //Set actionbar title after getAndSetIntentData method
         ActionBar ab = getSupportActionBar();
         if (ab != null) {
-            ab.setTitle(app_name);
+            ab.setTitle("Update Credentials for " + app_name);
         }
 
         update_button.setOnClickListener(new View.OnClickListener() {
@@ -89,9 +89,9 @@ public class UpdateActivity extends AppCompatActivity {
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-//                MyDatabaseHelper myDB = new MyDatabaseHelper(UpdateActivity.this);
-//                myDB.deleteOneRow(id);
-//                finish();
+                MyDatabaseHelper myDB = new MyDatabaseHelper(UpdateActivity.this);
+                myDB.deleteOneRow(_id);
+                finish();
             }
         });
         builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -100,6 +100,9 @@ public class UpdateActivity extends AppCompatActivity {
 
             }
         });
-        builder.create().show();
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(android.R.color.black));
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(android.R.color.black));
     }
 }

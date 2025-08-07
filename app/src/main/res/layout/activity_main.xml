@@ -36,6 +36,36 @@
         app:layout_constraintVertical_bias="0.905"
         app:srcCompat="@drawable/ic_ad" />
 
+    <ImageView
+        android:id="@+id/empty"
+        android:layout_width="173dp"
+        android:layout_height="412dp"
+        android:alpha="0.5"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/recyclerView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.498"
+        app:srcCompat="@drawable/ic_empty"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/no_data"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:alpha="0.5"
+        android:text="No Data"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/empty"
+        app:layout_constraintEnd_toEndOf="@+id/empty"
+        app:layout_constraintStart_toStartOf="@+id/empty"
+        app:layout_constraintTop_toTopOf="@+id/empty"
+        app:layout_constraintVertical_bias="0.727"
+        tools:ignore="MissingConstraints" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

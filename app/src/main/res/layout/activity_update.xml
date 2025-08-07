@@ -53,6 +53,8 @@
         android:layout_marginTop="40dp"
         android:text="Update"
         android:textSize="20sp"
+        android:textColor="@color/white"
+        android:backgroundTint="#713CF6"
         android:textAllCaps="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

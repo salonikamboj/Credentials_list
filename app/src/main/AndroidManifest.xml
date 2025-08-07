@@ -13,6 +13,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".UpdateActivity"
+            android:parentActivityName=".MainActivity"
             android:exported="false" />
         <activity
             android:name=".AddActivity"
