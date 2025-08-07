@@ -12,10 +12,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:label="Add Credentials"
-            android:parentActivityName=".MainActivity"
-            android:name=".AddActivity"
+            android:name=".UpdateActivity"
             android:exported="false" />
+        <activity
+            android:name=".AddActivity"
+            android:exported="false"
+            android:label="Add Credentials"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
