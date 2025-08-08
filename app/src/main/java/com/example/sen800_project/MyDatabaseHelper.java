@@ -9,6 +9,9 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import java.math.BigInteger;
+import java.util.List;
+
 public class MyDatabaseHelper extends SQLiteOpenHelper {
     private Context context;
     private static final String DATABASE_NAME = "Credentials.db";
@@ -41,19 +44,29 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    void addCredentials(String appName, String email, String password){
+    void addCredentials(String appName, String email, String password, BigInteger e, BigInteger n) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_APP_NAME, appName);
         cv.put(COLUMN_EMAIL, email);
-        cv.put(COLUMN_PASSWORD, password);
-        long result = db.insert(TABLE_NAME,null, cv);
-        if(result == -1){
-            Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
-        }else {
-            Toast.makeText(context, "Added Successfully!", Toast.LENGTH_SHORT).show();
+
+        RSAHelper rsaHelper = new RSAHelper();
+        rsaHelper.generateKeys(new BigInteger("61"), new BigInteger("53"));
+        List<BigInteger> encryptedPassword = rsaHelper.encrypt(password, e, n);
+
+        StringBuilder encryptedPasswordString = new StringBuilder();
+        for (BigInteger block : encryptedPassword) {
+            encryptedPasswordString.append(block.toString()).append(" ");
         }
 
+        cv.put(COLUMN_PASSWORD, encryptedPasswordString.toString().trim());
+
+        long result = db.insert(TABLE_NAME, null, cv);
+        if (result == -1) {
+            Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(context, "Added Successfully!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     Cursor readAllData(){
@@ -67,20 +80,31 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
-    void updateData(String row_id, String app_name, String email, String password){
+    void updateData(String row_id, String app_name, String email, String password, BigInteger e, BigInteger n) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_APP_NAME, app_name);
         cv.put(COLUMN_EMAIL, email);
-        cv.put(COLUMN_PASSWORD, password);
 
-        long result = db.update(TABLE_NAME, cv, "_id=?", new String[]{row_id});
-        if(result == -1){
-            Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
-        }else {
-            Toast.makeText(context, "Updated Successfully!", Toast.LENGTH_SHORT).show();
+        // Encrypt the updated password
+        RSAHelper rsaHelper = new RSAHelper();
+        rsaHelper.generateKeys(new BigInteger("61"), new BigInteger("53")); // Example primes, replace with real ones
+        List<BigInteger> encryptedPassword = rsaHelper.encrypt(password, e, n);
+
+        // Convert the encrypted password list to a string
+        StringBuilder encryptedPasswordString = new StringBuilder();
+        for (BigInteger block : encryptedPassword) {
+            encryptedPasswordString.append(block.toString()).append(" ");
         }
 
+        cv.put(COLUMN_PASSWORD, encryptedPasswordString.toString().trim());
+
+        long result = db.update(TABLE_NAME, cv, "_id=?", new String[]{row_id});
+        if (result == -1) {
+            Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(context, "Updated Successfully!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     void deleteOneRow(String row_id){

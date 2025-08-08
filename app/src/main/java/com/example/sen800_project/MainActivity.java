@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,13 +21,18 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     FloatingActionButton add_Button;
     MyDatabaseHelper myDB;
-    ArrayList<String> _id, app_name, email, password;
+
+    ArrayList<String> _id, app_name, email, password; // this is the displayed password string
+    ArrayList<String> decryptedPasswords; // only decrypted values
+    ArrayList<String> encryptedPasswords; // only encrypted values
 
     CustomAdapter customAdapter;
     ImageView empty_imageview;
@@ -39,56 +43,92 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        recyclerView = findViewById(R.id.recyclerView);
+        add_Button = findViewById(R.id.add_button_icon);
+        empty_imageview = findViewById(R.id.empty);
+        no_data = findViewById(R.id.no_data);
 
-         recyclerView = findViewById(R.id.recyclerView);
-         add_Button = findViewById(R.id.add_button_icon);
-         empty_imageview = findViewById(R.id.empty);
-         no_data = findViewById(R.id.no_data);
-
-         add_Button.setOnClickListener(new View.OnClickListener() {
-             @Override
-             public void onClick(View v) {
-                 Intent intent = new Intent(MainActivity.this, AddActivity.class);
-                 startActivity(intent);
-
-             }
-         });
+        add_Button.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, AddActivity.class);
+            startActivity(intent);
+        });
 
         myDB = new MyDatabaseHelper(MainActivity.this);
         _id = new ArrayList<>();
         app_name = new ArrayList<>();
         email = new ArrayList<>();
         password = new ArrayList<>();
+        decryptedPasswords = new ArrayList<>();
+        encryptedPasswords = new ArrayList<>();
 
         displayData();
-        customAdapter = new CustomAdapter(MainActivity.this, this,_id,app_name,email,password );
+
+        customAdapter = new CustomAdapter(
+                MainActivity.this,
+                this,
+                _id,
+                app_name,
+                email,
+                password,
+                decryptedPasswords,
+                encryptedPasswords
+        );
+
         recyclerView.setAdapter(customAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == 1){
+        if (requestCode == 1) {
             recreate();
         }
-
     }
 
-    void displayData(){
+    void displayData() {
         Cursor cursor = myDB.readAllData();
-        if(cursor.getCount() ==0){
+        if (cursor.getCount() == 0) {
             empty_imageview.setVisibility(View.VISIBLE);
             no_data.setVisibility(View.VISIBLE);
-        }
-        else{
-            while(cursor.moveToNext()){
-                _id.add(cursor.getString(0));
-                app_name.add(cursor.getString(1));
-                email.add(cursor.getString(2));
-                password.add(cursor.getString(3));
+        } else {
+            // RSA key setup
+            BigInteger p = new BigInteger("61");
+            BigInteger q = new BigInteger("53");
+            BigInteger n = p.multiply(q);
+            BigInteger phi = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE));
+            BigInteger e = new BigInteger("65537");
+            BigInteger d = e.modInverse(phi);
+
+            RSAHelper rsaHelper = new RSAHelper();
+
+            while (cursor.moveToNext()) {
+                String id = cursor.getString(0);
+                String appName = cursor.getString(1);
+                String emailVal = cursor.getString(2);
+                String encryptedStr = cursor.getString(3);
+
+                String decryptedStr;
+                try {
+                    String[] parts = encryptedStr.split(" ");
+                    List<BigInteger> encryptedBlocks = new ArrayList<>();
+                    for (String part : parts) {
+                        encryptedBlocks.add(new BigInteger(part));
+                    }
+                    decryptedStr = rsaHelper.decrypt(encryptedBlocks, d, n);
+                } catch (Exception ex) {
+                    decryptedStr = "Decryption Error";
+                }
+
+                _id.add(id);
+                app_name.add(appName);
+                email.add(emailVal);
+                password.add("Enc: " + encryptedStr + "\nDec: " + decryptedStr);
+
+                decryptedPasswords.add(decryptedStr); // only decrypted value
+                encryptedPasswords.add(encryptedStr); // only encrypted value
             }
+
             empty_imageview.setVisibility(View.GONE);
             no_data.setVisibility(View.GONE);
         }
@@ -103,35 +143,29 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if(item.getItemId() == R.id.delete_all){
+        if (item.getItemId() == R.id.delete_all) {
             confirmDialog();
         }
         return super.onOptionsItemSelected(item);
     }
-    void confirmDialog(){
+
+    void confirmDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Delete All?");
         builder.setMessage("Are you sure you want to delete all Data?");
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                MyDatabaseHelper myDB = new MyDatabaseHelper(MainActivity.this);
-                myDB.deleteAllData();
-                //Refresh Activity
-                Intent intent = new Intent(MainActivity.this, MainActivity.class);
-                startActivity(intent);
-                finish();
-            }
+        builder.setPositiveButton("Yes", (dialogInterface, i) -> {
+            MyDatabaseHelper myDB = new MyDatabaseHelper(MainActivity.this);
+            myDB.deleteAllData();
+            Intent intent = new Intent(MainActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
         });
-        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
-            }
-        });
+        builder.setNegativeButton("No", null);
         AlertDialog dialog = builder.create();
         dialog.show();
-        dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(android.R.color.black));
-        dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(android.R.color.black));
+        dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
+                .setTextColor(getResources().getColor(android.R.color.black));
+        dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE)
+                .setTextColor(getResources().getColor(android.R.color.black));
     }
 }
