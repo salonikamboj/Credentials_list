@@ -34,7 +34,7 @@ public class UpdateActivity extends AppCompatActivity {
         update_button = findViewById(R.id.update_button);
         delete_button = findViewById(R.id.delete_button);
 
-        // RSA key setup (must match Add/Main)
+        // RSA key setup
         BigInteger p = new BigInteger("61");
         BigInteger q = new BigInteger("53");
         n = p.multiply(q);

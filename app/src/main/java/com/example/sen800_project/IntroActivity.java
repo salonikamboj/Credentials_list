@@ -18,7 +18,7 @@ public class IntroActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(IntroActivity.this, MainActivity.class);
                 startActivity(intent);
-                finish(); // So user can't go back to intro screen
+                finish(); // user can't go back to intro screen
             }
         });
     }
